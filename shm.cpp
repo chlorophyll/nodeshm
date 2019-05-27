@@ -49,14 +49,14 @@ void open(const v8::FunctionCallbackInfo<v8::Value>& args)
     const mode_t mode = args[2]->ToInteger()->Value();
 
     v8::String::Utf8Value str(args[0]->ToString());
-    char* name = (char*)calloc(1, str.length());
-    strcpy(name, (char*)*str);
 
-    int retVal = shm_open(name, oflag, mode);
+    int retVal = shm_open(*str, oflag, mode);
 
-    free(name);
-
-    args.GetReturnValue().Set(retVal);
+    if (retVal < 0) {
+        args.GetReturnValue().Set(-errno);
+    } else {
+        args.GetReturnValue().Set(retVal);
+    }
 }
 
 static void RegisterModule(v8::Local<v8::Object> exports)
